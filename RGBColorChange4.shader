@@ -1,11 +1,13 @@
-﻿Shader "RGB Color Change/3 Color Gradient" {
+﻿Shader "RGB Color Change/4 Color" {
 	Properties {
 		_MainTex ("Color Map", 2D) = "white" {}
-		_Color1 ("Red(255,0,0) Replacer", Color) = (1,1,1,1)
-		_Color2 ("Green(0,255,0) Replacer", Color) = (1,1,1,1)
-		_Color3 ("Blue(0,0,255) Replacer", Color) = (1,1,1,1)
+		_Color1 ("Base Color(Replaces White(255,255,255))", Color) = (1,1,1,1)
+		_Color2 ("Red(255,0,0) Replacer", Color) = (1,1,1,1)
+		_Color3 ("Green(0,255,0) Replacer", Color) = (1,1,1,1)
+		_Color4 ("Blue(0,0,255) Replacer", Color) = (1,1,1,1)
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
+		
 	}
 	SubShader {
 		Tags { "RenderType"="Opaque" }
@@ -19,8 +21,8 @@
 		#pragma target 3.0
 
 		sampler2D _MainTex;
-		float4 _Color1,_Color2,_Color3;
-
+		float4 _Color1,_Color2,_Color3,_Color4;
+		
 		struct Input {
 			float2 uv_MainTex;
 		};
@@ -32,12 +34,10 @@
 		void surf (Input IN, inout SurfaceOutputStandard o) {
 			// Albedo comes from a texture tinted by color
 			fixed4 c = tex2D (_MainTex, IN.uv_MainTex);
-			fixed4 r = _Color1 * (c.r,c.r,c.r,c.r);
-			fixed4 g = _Color2 * (c.g,c.g,c.g,c.g);
-			fixed4 b = _Color3 * (c.b,c.b,c.b,c.b);
-			fixed4 average = (r + g + b);
-			c = average;
-			 
+			if (c.r >= .1 && c.g >= .1 && c.b >= .1) c = _Color1;
+			else if (c.r >= .1) c = _Color2;
+			else if (c.g >= .1) c = _Color3;
+			else if (c.b >= .1) c = _Color4;
 			o.Albedo = c.rgb;
 			// Metallic and smoothness come from slider variables
 			o.Metallic = _Metallic;
